@@ -11,18 +11,21 @@ rule target:
     input:
         #'output/blastp_viral/blastp_viral.outfmt6',
         'output/dafv_blastp/dafv_blastp.outfmt6',
-        'output/raxml/tree_inf/01.raxml.bestTree',
-        'output/raxml/tree_inf/02.raxml.bestTree',
-        'output/raxml/raxml_all/DCMut.raxml.bestTree'
+        'output/raxml/raxml_all/Blosum62.raxml.bestTree'
+
+
+#cat T{3,4}.raxml.mlTrees T5.raxml.bestTree > mltrees
+#raxml-ng --rfdist --tree mltrees --prefix RF
+##grep "Final LogLikelihood:" *.raxml.log - which model has highest likelihood?
 
 rule raxml_all:
     input:
         msa = 'output/raxml/check/check.raxml.reduced.phy'
     output:
-        'output/raxml/raxml_all/DCMut.raxml.bestTree'
+        'output/raxml/raxml_all/Blosum62.raxml.bestTree'
     params:
         wd = 'output/raxml/raxml_all',
-        prefix = 'output/raxml/raxml_all/DCMut'
+        prefix = 'output/raxml/raxml_all/Blosum62'
     singularity:
         raxmlng_container
     log:
@@ -31,60 +34,13 @@ rule raxml_all:
         20
     shell:
         'raxml-ng '
+        '--all '
         '--msa {input.msa} '
-        '--model DCMut ' ##check this is best model, change number bootstrap reps
+        '--model Blosum62 ' ##blosum62 gives highest likelihood, after testing each model
+        '--bs-trees 1000 ' #1000 bootstrap replicates
         '--prefix {params.prefix} '
         '--threads {threads} '
-        '--seed 2 '
-        '2> {log}'
-
-rule raxml_search1:
-    input:
-        msa = 'output/raxml/check/check.raxml.reduced.phy'
-    output:
-        'output/raxml/tree_inf/02.raxml.bestTree'
-    params:
-        wd = 'output/raxml/tree_inf',
-        prefix = 'output/raxml/tree_inf/02'
-    singularity:
-        raxmlng_container
-    log:
-        'output/logs/raxml_tree_inf_search.log'
-    threads:
-        20
-    shell:
-        'raxml-ng '
-        '--search1 '
-        '--msa {input.msa} '
-        '--model LG '
-        '--prefix {params.prefix} '
-        '--threads {threads} '
-        '--seed 2 '
-        '2> {log}'
-
-rule raxml_tree_inf:
-    input:
-        msa = 'output/raxml/check/check.raxml.reduced.phy'
-    output:
-        'output/raxml/tree_inf/01.raxml.bestTree'
-    params:
-        wd = 'output/raxml/tree_inf',
-        prefix = 'output/raxml/tree_inf/01'
-    singularity:
-        raxmlng_container
-    log:
-        'output/logs/raxml_tree_inf.log'
-    threads:
-        20
-    shell:
-        'mkdir {params.wd} || exit 1 ;'
-        'raxml-ng '
-        '--msa {input.msa} '
-        '--model LG '
-        '--prefix {params.prefix} '
-        '--threads {threads} '
-        '--seed 2 '
-        '--tree pars{{25}},rand{{25}} ' ##25 parsimony trees and 25 random trees
+        '--seed 11280 '
         '2> {log}'
 
 rule raxml_check:
