@@ -13,11 +13,14 @@ rule target:
         'output/dafv_blastp/dafv_blastp.outfmt6',
         'output/raxml/raxml_all/Blosum62.raxml.bestTree'
 
+######################
+## concat phylogeny ##
+######################
 
-#cat T{3,4}.raxml.mlTrees T5.raxml.bestTree > mltrees
-#raxml-ng --rfdist --tree mltrees --prefix RF
+##draw tree using iTOL and edit in inkscape
+
 ##grep "Final LogLikelihood:" *.raxml.log - which model has highest likelihood?
-
+##Isn't a metric to compare between different trees, but between same tree with different settings
 rule raxml_all:
     input:
         msa = 'output/raxml/check/check.raxml.reduced.phy'
@@ -64,7 +67,7 @@ rule raxml_check:
         '--prefix {params.prefix}'
 
 ##trim alignments
-rule trimal:
+rule trimal_concat:
     input:
         'output/muscle/FcC_supermatrix.fas'
     output:
@@ -93,6 +96,10 @@ rule FASconCAT_G_concat:
         'cd {params.muscle_dir} || exit 1 ; '
         'perl FASconCAT-G_v1.05.pl '
         '-s'
+
+#################
+## align genes ##
+#################
 
 ##align genes separately
 rule muscle_align:
