@@ -9,7 +9,6 @@ raxmlng_container = 'docker://evolbioinfo/raxml-ng:v1.0.2'
 
 rule target:
     input:
-        #'output/blastp_viral/blastp_viral.outfmt6',
         'output/dafv_blastp/dafv_blastp.outfmt6',
         'output/raxml/raxml_all/Blosum62.raxml.bestTree'
 
@@ -138,49 +137,3 @@ rule blast_dafv:
         '-evalue 1e-05 '
         '-outfmt "6 std staxids salltitles" > {output.blastp_res} '
         '2> {log}'
-
-rule blastp_viral:
-    input:
-        prodigal_proteins = 'data/Mh_prodigal/protein_translations.faa',
-        blast_db = 'output/blastdb/viral_db/viral_db.phr'
-    output:
-        blastp_res = 'output/blastp_viral/blastp_viral.outfmt6'
-    params:
-        viral_db = 'output/blastdb/viral_db/viral_db'
-    threads:
-        20
-    log:
-        'output/logs/blastp_viral.log'
-    shell:
-        'blastp '
-        '-query {input.prodigal_proteins} '
-        '-db {params.viral_db} '
-        '-num_threads {threads} '
-        '-evalue 1e-05 '
-        '-outfmt "6 std salltitles" > {output.blastp_res} '
-        '2>{log}'
-
-rule make_viral_blast_db:
-    input:
-        'output/viral_proteins.fasta'
-    output:
-        blast_db = 'output/blastdb/viral_db/viral_db.phr'
-    params:
-        db_name = 'viral_db',
-        db_dir = 'output/blastdb/viral_db/viral_db'
-    log:
-        'output/logs/make_viral_blast_db.log'
-    shell:
-        'makeblastdb '
-        '-in {input} '
-        '-dbtype prot '
-        '-title {params.db_name} '
-        '-out {params.db_dir} '
-        '-parse_seqids '
-        '2> {log}'
-
-rule cat_viral_files:
-    output:
-        'output/viral_proteins.fasta'
-    shell:
-        'cat data/ncbi_proteins/*.fasta > {output}'
